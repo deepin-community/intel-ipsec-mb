@@ -1,0 +1,20 @@
+#
+#  I believe these warnings pertain to Bug#1014045 
+#  "source-is-missing doesn't seem to understand docbook"
+#
+intel-ipsec-mb source: source-is-missing */index.html*
+intel-ipsec-mb source: source-is-missing */intel-ipsec-mb_8h.html*
+intel-ipsec-mb source: source-is-missing */intel-ipsec-mb_8h_source.html*
+intel-ipsec-mb source: source-is-missing */jquery.js*
+#
+#  Pedantic overrides
+#
+intel-ipsec-mb source: source-contains-prebuilt-doxygen-documentation */*.html*
+intel-ipsec-mb source: source-contains-prebuilt-javascript-object */jquery.js*
+intel-ipsec-mb source: very-long-line-length-in-source-file */tabs.css*
+intel-ipsec-mb source: very-long-line-length-in-source-file */index.html*
+intel-ipsec-mb source: very-long-line-length-in-source-file */win_x64.mak*
+intel-ipsec-mb source: very-long-line-length-in-source-file */intel-ipsec-mb_8h_source.html*
+intel-ipsec-mb source: very-long-line-length-in-source-file */intel-ipsec-mb_8h.html*
+intel-ipsec-mb source: very-long-line-length-in-source-file */jquery.js*
+
