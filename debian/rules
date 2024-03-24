@@ -1,4 +1,56 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/architecture.mk
+
+DESTDIR=$$(pwd)/debian/tmp
+LIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH)
+HDRDIR=/usr/include
+MANDIR=/usr/share/man/man7
+DOCDIR=/usr/share/doc
+
+VERSION_MAJOR=$(shell grep -e "IMB_VERSION_STR" lib/intel-ipsec-mb.h | cut -d'"' -f2 | cut -d'.' -f1)
+VERSION_MINOR=$(shell grep -e "IMB_VERSION_STR" lib/intel-ipsec-mb.h | cut -d'"' -f2 | cut -d'.' -f2)
+VERSION_PATCH=$(shell grep -e "IMB_VERSION_STR" lib/intel-ipsec-mb.h | cut -d'"' -f2 | cut -d'.' -f3)
+
+MAN1 = libipsec-mb.7
+MAN2 = libipsec-mb-dev.7
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+override_dh_auto_build:
+	$(shell dpkg-buildflags --export=sh); SHARED=y dh_auto_build
+	find . -name "*.o" -exec rm {} \;
+	$(shell dpkg-buildflags --export=sh); SHARED=n dh_auto_build
+
+override_dh_auto_install:
+	# Install the library
+	find $$(pwd) -name "libIPSec_MB.so*" -exec ls -al {} \;
+	install -d ${DESTDIR}${LIBDIR}
+	install -m 0644 $$(pwd)/lib/libIPSec_MB.a ${DESTDIR}${LIBDIR}
+	install -m 0644 $$(pwd)/lib/libIPSec_MB.so.${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH} ${DESTDIR}${LIBDIR}
+
+	ln -s ${LIBDIR}/libIPSec_MB.so.${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH} ${DESTDIR}${LIBDIR}/libIPSec_MB.so.${VERSION_MAJOR}
+	ln -s ${LIBDIR}/libIPSec_MB.so.${VERSION_MAJOR} ${DESTDIR}${LIBDIR}/libIPSec_MB.so
+
+	#dpkg-shlibdeps ${DESTDIR}${LIBDIR}/libIPSec_MB.so.${VERSION_MAJOR}.${VERSION_MINOR}
+
+	# Install the header files
+	install -d ${DESTDIR}${HDRDIR}
+	install -m 0644 $$(pwd)/lib/intel-ipsec-mb.h ${DESTDIR}${HDRDIR}
+
+	# Install man pages
+	install -d ${DESTDIR}${MANDIR}
+	install -m 0444 $$(pwd)/lib/${MAN1} ${DESTDIR}${MANDIR}
+	install -m 0444 $$(pwd)/lib/${MAN2} ${DESTDIR}${MANDIR}
+
+#
+# Disable elf debug optimization step
+#
+override_dh_dwz:
+
 %:
 	dh $@
+	dh_makeshlibs
+	dh_shlibdeps
